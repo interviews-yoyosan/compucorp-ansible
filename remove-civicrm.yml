@@ -1,6 +1,6 @@
 --- # Playbook for removing CivCRM  from a server.
 - hosts: testserver
-  remote_user: ec2-user
+  remote_user: ubuntu
   become: yes
   become_method: sudo
   connection: ssh
