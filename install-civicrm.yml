@@ -1,0 +1,11 @@
+--- # Playbook for CivCRM installation.
+- hosts: testserver
+  remote_user: ec2-user
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  roles:
+    - { role: geerlingguy.php, php_enable_webserver: false }
+    - { role: geerlingguy.drupal-console, drupal_console_keep_updated: true }

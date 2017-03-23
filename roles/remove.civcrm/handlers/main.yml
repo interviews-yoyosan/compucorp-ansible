@@ -1,0 +1,15 @@
+---
+- name: remove webserver
+  yum:
+    name: "{{ php_webserver_daemon }}"
+    state: absent
+  when: php_enable_webserver
+  notify: remove directories
+- name: remove directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ php_conf_paths }}"
+    - "{{ php_extension_conf_paths }}"
+    - "{{ php_fpm_conf_path }}"

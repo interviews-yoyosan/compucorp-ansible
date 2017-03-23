@@ -1,0 +1,10 @@
+--- # Playbook for removing CivCRM  from a server.
+- hosts: testserver
+  remote_user: ec2-user
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  roles:
+    - { role: remove.civcrm, php_packages_state: absent }
