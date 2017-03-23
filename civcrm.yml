@@ -1,0 +1,11 @@
+--- # Playbook for CivCRM installation.
+- hosts: testserver
+  remote_user: test
+  become: yes
+  become_method: sudo
+  connection: ssh
+  gather_facts: yes
+
+  roles:
+    - geerlingguy.php
+    - geerlingguy.drupal-console
