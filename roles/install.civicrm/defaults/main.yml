@@ -1,0 +1,9 @@
+--- # Defaults for CiviCRM
+#
+server_domain: yoyosan.tk
+
+#
+ssl_cert_path: /etc/letsencrypt/live
+
+#
+root_dir: /var/www/compucorp

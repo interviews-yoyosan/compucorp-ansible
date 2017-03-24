@@ -121,3 +121,6 @@ php_source_configure_command: >
   --with-bz2=/usr
   --with-recode=/usr
   --with-mysqli=/usr/bin/mysql_config
+
+drupal_console_path: /usr/local/bin/drupal
+drupal_console_config: ~/.console

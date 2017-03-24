@@ -1,0 +1,37 @@
+- name: Install Nginx packages
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - ca-certificates
+    - nginx
+    - gettext-base
+- name: Copy the Nginx configuration.
+  template:
+    src: nginx.conf.js
+    dest: /etc/nginx/sites-enabled/default
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy SSL certificatices.
+  - generate stronger certs as advised in the last PCI security scan.
+
+- name: Install MariaDB/Mysql
+  - secure installation
+  - setup needed credentials and databases for drupal and civicrm
+  - https://wiki.civicrm.org/confluence/display/CRMDOC/CiviCRM+MySQL+Permission+Requirements
+
+- name: Install drupal via Drush.
+- name: Setup Drupal for the first time.
+- name: Install CiviCRM via web interface using https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+Drupal+7
+- name: Fix CiviCRM images and script weren’t loading to due the amazon ec2 domain being present in the sites/default/civicrm.settings.php file.
+- name: Fix Drupal and CiviCRM security warnings.
+- name: Install Views3 via web interface?!
+- name: Install needed crons.
+- name: Backup the database
+  - install the needed external library
+  - manually create the backup via web interface
+- name: Schedule a PCI compliance scan.
+
+

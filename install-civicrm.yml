@@ -7,5 +7,6 @@
   gather_facts: yes
 
   roles:
-    - { role: geerlingguy.php, php_enable_webserver: false }
+    - { role: geerlingguy.php, php_enable_webserver: false, php_enable_php_fpm: true }
     - { role: geerlingguy.drupal-console, drupal_console_keep_updated: true }
+    - install.civicrm

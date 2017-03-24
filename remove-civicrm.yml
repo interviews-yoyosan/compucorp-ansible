@@ -7,4 +7,4 @@
   gather_facts: yes
 
   roles:
-    - { role: remove.civcrm, php_packages_state: absent }
+    - { role: remove.civicrm, php_packages_state: absent }
