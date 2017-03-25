@@ -1,37 +1,95 @@
-- name: Install Nginx packages
+- name: Copy uninstall script.
+  copy:
+    src: uninstall.sh
+    dest: /home/ubuntu/uninstall.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: 0700
+
+- name: Nginx | Install package.
   package:
     name: "{{ item }}"
     state: latest
   with_items:
-    - ca-certificates
     - nginx
-    - gettext-base
-- name: Copy the Nginx configuration.
+    - nginx-core
+    - nginx-common
+
+- name: Nginx | Create the SSL folder.
+  file:
+    path: /etc/ssl/private/{{ server_domain }}
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Nginx | Install the SSL certificates.
+  unarchive:
+    src: certs/certs.tar.bz2
+    dest: /etc/ssl/private/{{ server_domain }}
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart nginx
+
+- name: Nginx | Copy the needed configuration.
   template:
-    src: nginx.conf.js
+    src: nginx.conf.j2
     dest: /etc/nginx/sites-enabled/default
     owner: root
     group: root
     mode: 0644
+  notify: restart nginx
 
-- name: Copy SSL certificatices.
-  - generate stronger certs as advised in the last PCI security scan.
+- name: MySQL | Set debconf vars with the root password.
+  shell: echo mysql-server mysql-server/root_password password {{ db_root_password }} | debconf-set-selections
 
-- name: Install MariaDB/Mysql
-  - secure installation
-  - setup needed credentials and databases for drupal and civicrm
-  - https://wiki.civicrm.org/confluence/display/CRMDOC/CiviCRM+MySQL+Permission+Requirements
+- name: MySQL | Install packages.
+  package: name={{ item }} state=latest
+  with_items:
+    - mysql-server
+    - libmysqlclient-dev
 
-- name: Install drupal via Drush.
-- name: Setup Drupal for the first time.
-- name: Install CiviCRM via web interface using https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+Drupal+7
-- name: Fix CiviCRM images and script weren’t loading to due the amazon ec2 domain being present in the sites/default/civicrm.settings.php file.
-- name: Fix Drupal and CiviCRM security warnings.
-- name: Install Views3 via web interface?!
-- name: Install needed crons.
-- name: Backup the database
-  - install the needed external library
-  - manually create the backup via web interface
-- name: Schedule a PCI compliance scan.
+- name: MySQL | Secure the installation.
+  shell: mysql_secure_installation -uroot -p{{ db_root_password }} -D
 
+- name: Python | Install the pip package.
+  package: name=python-pip state=latest
+
+- name: Python | Upgrade pip.
+  shell: pip install --upgrade pip
+
+- name: Python | Install the Python MySQLB module.
+  pip: name=MySQL-python state=latest
+
+- name: MySQL | Create databases for Drupal and CiviCRM.
+  mysql_db:
+    name: "{{ item.name }}"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  with_items:
+    - "{{ databases }}"
+
+- name: MySQL | Create users for Drupal and CiviCRM.
+  mysql_user:
+    name: "{{ item.user }}"
+    password: "{{ item.password }}"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    priv: "{{ item.privs }}"
+  with_items:
+    - "{{ databases }}"
+
+# - name: Install drupal via Drush.
+# - name: Setup Drupal for the first time.
+# - name: Install CiviCRM via web interface using https://wiki.civicrm.org/confluence/display/CRMDOC/Installing+CiviCRM+for+Drupal+7
+# - name: Fix CiviCRM images and script weren’t loading to due the amazon ec2 domain being present in the sites/default/civicrm.settings.php file.
+# - name: Fix Drupal and CiviCRM security warnings.
+# - name: Install Views3 via web interface?!
+# - name: Install needed crons.
+# - name: Backup the database
+#   - install the needed external library
+#   - manually create the backup via web interface
 

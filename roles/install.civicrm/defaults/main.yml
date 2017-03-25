@@ -7,3 +7,13 @@ ssl_cert_path: /etc/letsencrypt/live
 
 #
 root_dir: /var/www/compucorp
+
+databases:
+  - name: drupal
+    user: "{{ db_drupal_user }}"
+    password: "{{ db_drupal_password }}"
+    privs: "drupal.*:ALL"
+  - name: civicrm
+    user: "{{ db_civicrm_user }}"
+    password: "{{ db_civicrm_password }}"
+    privs: "civicrm.*:ALL"
