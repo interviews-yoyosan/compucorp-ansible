@@ -15,6 +15,7 @@ This playbook will install Drupal and CiviCRM via Ansible on a given Ubuntu serv
   - [X] Install and secure Mysql.
   - [X] Create the users and databases for Drupal and CiviCRM.
     - Use stronger passwords.
-  - [ ] Install Drupal via drush.
+  - [ ] Install Drupal via drush and manual guide.
+  - [ ]
 - [ ] Cleanup and optimize the remove.civicrm role.
 - [ ] Cleanup and optimize the install.civicrm.role.

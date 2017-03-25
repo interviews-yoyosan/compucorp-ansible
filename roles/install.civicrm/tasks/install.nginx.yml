@@ -1,0 +1,34 @@
+- name: Nginx | Install package.
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - nginx
+    - nginx-core
+    - nginx-common
+
+- name: Nginx | Create the SSL folder.
+  file:
+    path: /etc/ssl/private/{{ server_domain }}
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Nginx | Install the SSL certificates.
+  unarchive:
+    src: certs/certs.tar.bz2
+    dest: /etc/ssl/private/{{ server_domain }}
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart nginx
+
+- name: Nginx | Copy the needed configuration.
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-enabled/default
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx

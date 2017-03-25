@@ -1,3 +1,4 @@
+--- # Main tasks.
 - name: Copy uninstall script.
   copy:
     src: uninstall.sh
@@ -6,81 +7,38 @@
     group: ubuntu
     mode: 0700
 
-- name: Nginx | Install package.
-  package:
-    name: "{{ item }}"
-    state: latest
-  with_items:
-    - nginx
-    - nginx-core
-    - nginx-common
+- include: install.nginx.yml
+- include: install.mysql.yml
 
-- name: Nginx | Create the SSL folder.
+- name: Drupal | Checkout via Drush.
+  shell: drush dl drupal-7 --drupal-project-rename={{ project_name }} --destination={{ root_dir }}
+
+- name: Drupal | Set permissions for www-data to be able to install Drupal.
   file:
-    path: /etc/ssl/private/{{ server_domain }}
+    path: "{{ root_dir }}/{{ project_name }}"
     state: directory
-    owner: root
-    group: root
-    mode: 0700
+    recurse: yes
+    owner: www-data
+    group: www-data
+    mode: 0755
 
-- name: Nginx | Install the SSL certificates.
-  unarchive:
-    src: certs/certs.tar.bz2
-    dest: /etc/ssl/private/{{ server_domain }}
-    owner: root
-    group: root
-    mode: 0600
-  notify: restart nginx
+- name: Drupal | Check whether file exists.
+  shell: ls "{{ root_dir }}/{{ project_name }}/sites/default/settings.php"
+  register: file_exists
 
-- name: Nginx | Copy the needed configuration.
-  template:
-    src: nginx.conf.j2
-    dest: /etc/nginx/sites-enabled/default
-    owner: root
-    group: root
+- name: Drupal | Copy default.settings.php to settings.php.
+  copy:
+    src: "{{ root_dir }}/{{ project_name }}/sites/default/default.settings.php"
+    dest: "{{ root_dir }}/{{ project_name }}/sites/default/settings.php"
+    remote_src: yes
+    owner: www-data
+    group: www-data
     mode: 0644
-  notify: restart nginx
+  when: file_exists.failed is defined
 
-- name: MySQL | Set debconf vars with the root password.
-  shell: echo mysql-server mysql-server/root_password password {{ db_root_password }} | debconf-set-selections
-
-- name: MySQL | Install packages.
-  package: name={{ item }} state=latest
-  with_items:
-    - mysql-server
-    - libmysqlclient-dev
-
-- name: MySQL | Secure the installation.
-  shell: mysql_secure_installation -uroot -p{{ db_root_password }} -D
-
-- name: Python | Install the pip package.
-  package: name=python-pip state=latest
-
-- name: Python | Upgrade pip.
-  shell: pip install --upgrade pip
-
-- name: Python | Install the Python MySQLB module.
-  pip: name=MySQL-python state=latest
-
-- name: MySQL | Create databases for Drupal and CiviCRM.
-  mysql_db:
-    name: "{{ item.name }}"
-    state: present
-    login_user: root
-    login_password: "{{ db_root_password }}"
-  with_items:
-    - "{{ databases }}"
-
-- name: MySQL | Create users for Drupal and CiviCRM.
-  mysql_user:
-    name: "{{ item.user }}"
-    password: "{{ item.password }}"
-    state: present
-    login_user: root
-    login_password: "{{ db_root_password }}"
-    priv: "{{ item.privs }}"
-  with_items:
-    - "{{ databases }}"
+- name: Drupal | Follow the installation script.
+  pause:
+    prompt: Go follow the installation steps manually. Press "Ctrl + C" when done.
 
 # - name: Install drupal via Drush.
 # - name: Setup Drupal for the first time.

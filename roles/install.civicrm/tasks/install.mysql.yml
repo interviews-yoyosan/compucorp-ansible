@@ -1,0 +1,43 @@
+- name: MySQL | Set debconf vars with the root password.
+  shell: echo mysql-server mysql-server/root_password password {{ db_root_password }} | debconf-set-selections
+
+- name: MySQL | Install packages.
+  package: name={{ item }} state=latest
+  with_items:
+    - mysql-server
+    - libmysqlclient-dev
+
+- name: MySQL | Secure the installation.
+  shell: mysql_secure_installation -uroot -p{{ db_root_password }} -D
+
+- name: Python | Install the pip package.
+  package: name=python-pip state=latest
+
+- name: Python | Upgrade pip.
+  shell: pip install --upgrade pip
+
+- name: Python | Install the Python MySQLB module.
+  pip: name=MySQL-python state=latest
+
+- name: MySQL | Create databases for Drupal and CiviCRM.
+  mysql_db:
+    name: "{{ item.name }}"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  with_items:
+    - "{{ databases }}"
+
+- name: MySQL | Create users for Drupal and CiviCRM.
+  mysql_user:
+    name: "{{ item.user }}"
+    password: "{{ item.password }}"
+    state: present
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    priv: "{{ item.privs }}"
+  with_items:
+    - "{{ databases }}"
+
+- name: MySQL | Install the PHP extension.
+  package: name=php-mysql state=latest
