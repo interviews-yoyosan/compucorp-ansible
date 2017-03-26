@@ -51,7 +51,7 @@
   with_items:
     - "{{ databases }}"
 
-- name: CiviCRM | Create logs dir for the cron.
+- name: Drupal | Create logs dir for the cron.
   file:
     path: "{{ project_dir }}/logs"
     state: directory
@@ -59,12 +59,27 @@
     group: www-data
     mode: 0755
 
-- name: CiviCRM | Install cron.
+- name: Drupal | Install cron for Drupal.
   cron:
-    job: "/usr/local/bin/drush -r /var/www/compucorp -l https://{{ server_domain }} civicrm-api -u {{ civicrm_cron_user }} job.execute > {{ project_dir }}/logs/cron.status.log"
+    job: "wget -O - -q -t 1 https://{{ server_domain }}/cron.php?cron_key=tayVa4xo5Bg0yv6uyHMWwJae1Pwgq6Ij_YcXX60PLzk"
+    name: "drupal-cron"
     state: present
     user: www-data
     minute: "*/5"
+
+- name: Drupal | Install cron for CiviCRM.
+  cron:
+    job: "/usr/local/bin/drush -r /var/www/compucorp -l https://{{ server_domain }} civicrm-api -u {{ civicrm_cron_user }} job.execute > {{ project_dir }}/logs/cron.status.log"
+    name: "civicrm-cron"
+    state: present
+    user: www-data
+    minute: "*/5"
+
+- name: Drupal Backup | Install amazon-s3-php library.
+  git:
+    repo: 'https://github.com/tpyo/amazon-s3-php-class.git'
+    dest: "{{ project_dir }}/sites/all/libraries/s3-php5-curl"
+    version: 'v0.5.1'
 
 - name: Drupal | Set permissions for www-data to be able to install Drupal.
   file:
