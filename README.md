@@ -2,13 +2,33 @@
 
 This playbook will install Drupal and CiviCRM via Ansible on a given Ubuntu server.
 
+# How to use it
+
+* The presumption is that we're running the installation on an Ubuntu 16.04 Server EC2 instance.
+* You'll find all the necessary passwords in the `roles/install.civicrm/vars/main.yml`, after you decrypt it.
+* Replace the value for `private_key_file` in `ansible.cfg` with your own private key, generated when creating a new EC2 instance.
+* Also replace the host used in the `hosts` file.
+
+## Installation
+
+1. Create a file called `.vaultpass` containing the provided password in the current directory.
+2. Copy the `server-prerequisites.sh` onto your server and run it to install the needed packages.
+3. Run the playbook
+```
+ansible-playbook install-civicrm.yml
+```
+
+## Clean up
+
+To clean up everything run `~/uninstall.sh`.
+
 # Tasks
 - [X] Research for Galaxy roles that might help me.
 - [X] Set up two playbooks for installing and removing CiviCRM.
 - [X] Create the remove CiviCRM role.
 - [X] Create the install CiviCRM role.
 - [X] Add an outline of what needs to be done for install.civicrm.
-- [ ] Implement the tasks/handlers/etc. needed for installation.
+- [X] Implement the tasks/handlers/etc. needed for installation.
   - [X] Install Nginx
   - [X] Securely add SSL certs
   - [X] Store credentials securely in a vault.
@@ -19,9 +39,6 @@ This playbook will install Drupal and CiviCRM via Ansible on a given Ubuntu serv
   - [X] Automate the installation of Drupal.
   - [X] Install CiviCRM manually.
   - [X] Automate the installation of CiviCRM.
-  - [ ] Install and setup the Backup module.
-  - [ ] Automate the installation of the Backup module.
-- [ ] Cleanup and optimize the remove.civicrm role.
-- [ ] Cleanup and optimize the install.civicrm.role.
-  - [ ] Expose encrypted variables name for reuse by other persons as recommended [here](http://docs.ansible.com/ansible/playbooks_best_practices.html#variables-and-vaults).
-  - [ ] Use [Ansible Best Practices](http://docs.ansible.com/ansible/playbooks_best_practices.html).
+  - [X] Install and setup the Backup module.
+  - [X] Automate the installation of the Backup module.
+- [X] Add instructions for the playbook.
