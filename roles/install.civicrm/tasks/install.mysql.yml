@@ -42,6 +42,3 @@
     priv: "{{ item.privs }}"
   with_items:
     - "{{ databases }}"
-
-- name: MySQL | Install the PHP extension.
-  package: name=php-mysql state=latest

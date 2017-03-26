@@ -17,8 +17,10 @@ This playbook will install Drupal and CiviCRM via Ansible on a given Ubuntu serv
     - Use stronger passwords.
   - [X] Install Drupal via drush and manual guide.
   - [X] Automate the installation of Drupal.
-  - [ ] Install CiviCRM.
-  - [ ] Automate the installation of CiviCRM.
+  - [X] Install CiviCRM manually.
+  - [X] Automate the installation of CiviCRM.
+  - [ ] Install and setup the Backup module.
+  - [ ] Automate the installation of the Backup module.
 - [ ] Cleanup and optimize the remove.civicrm role.
 - [ ] Cleanup and optimize the install.civicrm.role.
   - [ ] Expose encrypted variables name for reuse by other persons as recommended [here](http://docs.ansible.com/ansible/playbooks_best_practices.html#variables-and-vaults).

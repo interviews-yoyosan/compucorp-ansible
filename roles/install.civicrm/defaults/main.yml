@@ -1,7 +1,8 @@
 --- # Defaults for CiviCRM
 server_domain: yoyosan.tk
-root_dir: /var/www
+www_dir: /var/www
 project_name: compucorp
+project_dir: "{{ www_dir }}/{{ project_name }}"
 
 databases:
   - name: drupal

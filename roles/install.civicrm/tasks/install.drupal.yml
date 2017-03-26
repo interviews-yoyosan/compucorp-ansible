@@ -1,48 +1,77 @@
+- name: Drupal | Install needed PHP extensions.
+  package: name={{ item }} state=latest
+  with_items:
+    - php-mysql
+    - php-zip
+
 - name: Drupal | Checkout via Drush.
-  shell: drush dl drupal-7 --drupal-project-rename={{ project_name }} --destination={{ root_dir }}
+  shell: drush dl drupal-7 --drupal-project-rename={{ project_name }} --destination={{ www_dir }}
+
+- name: CiviCRM | Install needed modules and files directories.
+  unarchive:
+    src: "drupal/{{ item }}.tar.bz2"
+    dest: "{{ project_dir }}"
+  with_items:
+    - drupal-modules
+    - civicrm-files
+
+- name: Drupal | Copy configuration files.
+  template:
+    src: "drupal/{{ item }}.php.j2"
+    dest: "{{ project_dir }}/sites/default/{{ item }}.php"
+    owner: www-data
+    group: www-data
+    mode: 0644
+  with_items:
+    - settings
+    - civicrm.settings
+
+- name: Drupal | Copy .htaccess file.
+  template:
+    src: drupal/.htaccess.j2
+    dest: "{{ project_dir }}/sites/default/files/.htaccess"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Drupal | Unarchive DB dumps.
+  unarchive:
+    src: "drupal/{{ item.name }}.sql.tar.bz2"
+    dest: /tmp
+  with_items:
+    - "{{ databases }}"
+
+- name: Drupal | Import drupal and civicrm databases.
+  mysql_db:
+    state: import
+    name: "{{ item.name }}"
+    target: "/tmp/{{ item.name }}.sql"
+    login_user: root
+    login_password: "{{ db_root_password }}"
+  with_items:
+    - "{{ databases }}"
+
+- name: CiviCRM | Create logs dir for the cron.
+  file:
+    path: "{{ project_dir }}/logs"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+- name: CiviCRM | Install cron.
+  cron:
+    job: "/usr/local/bin/drush -r /var/www/compucorp -l https://{{ server_domain }} civicrm-api -u {{ civicrm_cron_user }} job.execute > {{ project_dir }}/logs/cron.status.log"
+    state: present
+    user: www-data
+    minute: "*/5"
 
 - name: Drupal | Set permissions for www-data to be able to install Drupal.
   file:
-    path: "{{ root_dir }}/{{ project_name }}"
+    path: "{{ project_dir }}"
     state: directory
     recurse: yes
     owner: www-data
     group: www-data
     mode: 0755
 
-- name: Drupal | Copy configuration file.
-  template:
-    src: drupal/settings.php.j2
-    dest: "{{ root_dir }}/{{ project_name }}/sites/default/settings.php"
-    owner: www-data
-    group: www-data
-    mode: 0644
-
-- name: Drupal | Create the files directory.
-  file:
-    path: "{{ root_dir }}/{{ project_name }}/sites/default/files"
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: 0755
-
-- name: Drupal | Copy .htaccess file.
-  template:
-    src: drupal/.htaccess.j2
-    dest: "{{ root_dir }}/{{ project_name }}/sites/default/files/.htaccess"
-    owner: www-data
-    group: www-data
-    mode: 0644
-
-- name: Drupal | Unarchive DB dump.
-  unarchive:
-    src: drupal.sql.tar.bz2
-    dest: /tmp
-
-- name: Drupal | Import drupal database.
-  mysql_db:
-    state: import
-    name: "{{ databases.0.name }}"
-    target: /tmp/drupal.sql
-    login_user: root
-    login_password: "{{ db_root_password }}"
