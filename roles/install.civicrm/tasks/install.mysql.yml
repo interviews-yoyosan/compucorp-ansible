@@ -1,10 +1,14 @@
-- name: MySQL | Set debconf vars with the root password.
-  shell: echo mysql-server mysql-server/root_password password {{ db_root_password }} | debconf-set-selections
+- name: MySQL | Set debconf vars.
+  action: raw sudo echo mysql-server mysql-server/root_password password {{ db_root_password }} | sudo /usr/bin/debconf-set-selections
+
+- name: MySQL | Set debconf vars.
+  action: raw sudo echo mysql-server mysql-server/root_password_again password {{ db_root_password }} | sudo /usr/bin/debconf-set-selections
 
 - name: MySQL | Install packages.
   package: name={{ item }} state=latest
   with_items:
     - mysql-server
+    - mysql-client
     - libmysqlclient-dev
 
 - name: MySQL | Secure the installation.

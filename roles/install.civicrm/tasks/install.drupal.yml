@@ -1,0 +1,48 @@
+- name: Drupal | Checkout via Drush.
+  shell: drush dl drupal-7 --drupal-project-rename={{ project_name }} --destination={{ root_dir }}
+
+- name: Drupal | Set permissions for www-data to be able to install Drupal.
+  file:
+    path: "{{ root_dir }}/{{ project_name }}"
+    state: directory
+    recurse: yes
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+- name: Drupal | Copy configuration file.
+  template:
+    src: drupal/settings.php.j2
+    dest: "{{ root_dir }}/{{ project_name }}/sites/default/settings.php"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Drupal | Create the files directory.
+  file:
+    path: "{{ root_dir }}/{{ project_name }}/sites/default/files"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+- name: Drupal | Copy .htaccess file.
+  template:
+    src: drupal/.htaccess.j2
+    dest: "{{ root_dir }}/{{ project_name }}/sites/default/files/.htaccess"
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Drupal | Unarchive DB dump.
+  unarchive:
+    src: drupal.sql.tar.bz2
+    dest: /tmp
+
+- name: Drupal | Import drupal database.
+  mysql_db:
+    state: import
+    name: "{{ databases.0.name }}"
+    target: /tmp/drupal.sql
+    login_user: root
+    login_password: "{{ db_root_password }}"
