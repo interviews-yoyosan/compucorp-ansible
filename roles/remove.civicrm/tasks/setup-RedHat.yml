@@ -1,9 +1,0 @@
----
-- name: Remove installed PHP packages.
-  package:
-    name: "{{ item }}"
-    state: "{{ php_packages_state }}"
-    enablerepo: "{{ php_enablerepo }}"
-  with_items:
-    - "{{ php_packages }}"
-  notify: remove webserver
